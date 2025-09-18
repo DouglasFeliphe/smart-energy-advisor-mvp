@@ -1,5 +1,6 @@
 import * as Icons from 'lucide-react';
 import React from 'react';
+import { cn } from '../../lib/utils';
 
 interface SummaryCardsProps {
   result: {
@@ -9,6 +10,17 @@ interface SummaryCardsProps {
   };
   savingsPercentage: number;
 }
+
+type CardProps = {
+  title: string;
+
+  value: string | number;
+
+  unit: string;
+  description: string;
+  icon: keyof typeof Icons;
+  textColor: 'green' | 'blue' | 'purple';
+};
 
 export const SummaryCards = ({
   result,
@@ -44,17 +56,6 @@ export const SummaryCards = ({
   );
 };
 
-type CardProps = {
-  title: string;
-
-  value: string | number;
-
-  unit: string;
-  description: string;
-  icon: keyof typeof Icons;
-  textColor: 'green' | 'blue' | 'purple';
-};
-
 const Card = ({
   title,
   value,
@@ -64,19 +65,47 @@ const Card = ({
   textColor,
 }: CardProps) => {
   const Icon = Icons[icon] as React.FC<React.SVGProps<SVGElement>>;
+  const textColorClasses = {
+    green: {
+      title: 'text-green-700',
+      icon: 'text-green-600',
+      value: 'text-green-700',
+      description: 'text-green-600',
+    },
+    blue: {
+      title: 'text-blue-700',
+      icon: 'text-blue-600',
+      value: 'text-blue-700',
+      description: 'text-blue-600',
+    },
+    purple: {
+      title: 'text-purple-700',
+      icon: 'text-purple-600',
+      value: 'text-purple-700',
+      description: 'text-purple-600',
+    },
+  };
 
   return (
-    <>
-      <div className="bg-green-50 rounded-xl p-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h3 className={`font-medium text-${textColor}-700`}>{title}</h3>
-          {Icon && <Icon className={`text-${textColor}-600 h-5 w-5`} />}
-        </div>
-        <p className={`text-2xl font-bold text-${textColor}-700 mt-2`}>
-          {value} {unit}
-        </p>
-        <p className={`text-sm text-${textColor}-600 mt-1`}>{description}</p>
+    <div className="card bg-green-50 rounded-xl p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <h3 className={`font-medium ${textColorClasses[textColor].title}`}>
+          {title}
+        </h3>
+        {Icon && (
+          <Icon className={`${textColorClasses[textColor].icon} h-5 w-5`} />
+        )}
       </div>
-    </>
+      <p
+        className={`text-2xl font-bold ${textColorClasses[textColor].value} mt-2`}
+      >
+        {value} {unit}
+      </p>
+      <p
+        className={cn('text-sm mt-1', textColorClasses[textColor].description)}
+      >
+        {description}
+      </p>
+    </div>
   );
 };
