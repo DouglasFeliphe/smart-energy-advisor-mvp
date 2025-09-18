@@ -5,7 +5,7 @@ import { calculateSavingsRate } from '../../functions/calculate';
 import { SAVINGS_RATES, TARIFF_RATES } from '../../config/constants';
 import { SummaryCards } from './SummaryCards';
 import { ConsumptionChart } from './ConsumptionChart';
-import { parseIconRecommendations } from '../../helpers/formatRecommendationsFromApiResponse';
+import { parseRecommendations } from '../../helpers/formatRecommendationsFromApiResponse';
 import { Tabs } from './Tabs';
 
 type ResultsDisplayProps = {
@@ -39,9 +39,16 @@ export function ResultsDisplay({
     return 'text-red-600';
   };
 
+  const formatNumber = (value: number): number => {
+    return Number(value.toFixed(2));
+  };
+
   const chartData = [
     { name: 'Current', kwh: kwh },
-    { name: 'Optimized', kwh: kwh - Number(result?.energySaved) },
+    {
+      name: 'Optimized',
+      kwh: formatNumber(kwh - Number(result?.energySaved)),
+    },
   ];
 
   const currentSavingsRate = calculateSavingsRate(kwh);
@@ -74,33 +81,28 @@ export function ResultsDisplay({
         <div className="space-y-6">
           {/* Consumption Details */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              Consumption Details
-            </h3>
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-semibold text-gray-700">
+                Consumption Details
+              </h3>
+              <Info className="h-4 w-4 text-gray-400" />
+            </div>
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <span className="text-gray-600">Current Consumption</span>
-                  <Info
-                    className="h-4 w-4 text-gray-400 cursor-help"
-                    aria-label="Current monthly energy consumption in kWh"
-                  />
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-medium">{kwh}</span>
+                  <span className="font-medium text-gray-600">{kwh}</span>
                   <span className="text-gray-500">kWh</span>
                 </div>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <span className="text-gray-600">Tariff Rate</span>
-                  <Info
-                    className="h-4 w-4 text-gray-400 cursor-help"
-                    aria-label="Current energy price per kWh"
-                  />
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-medium">
+                  <span className="font-medium text-gray-600">
                     R$ {tariffRate.toFixed(2)}
                   </span>
                   <span className="text-gray-500">/kWh</span>
@@ -109,10 +111,6 @@ export function ResultsDisplay({
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <span className="text-gray-600">Consumption Tier</span>
-                  <Info
-                    className="h-4 w-4 text-gray-400 cursor-help"
-                    aria-label="Your consumption category based on monthly usage"
-                  />
                 </div>
                 <span className={`font-medium ${getSavingsTierColor()}`}>
                   {kwh <= 200 ? 'Basic' : kwh <= 500 ? 'Medium' : 'High'}
@@ -164,24 +162,19 @@ export function ResultsDisplay({
           </h3>
           {recommendationData ? (
             <div className="space-y-4">
-              {parseIconRecommendations(recommendationData).map(
-                (recommendation, index) => (
-                  <div
-                    key={index}
-                    className="p-4 bg-green-50 rounded-lg border border-green-100"
-                  >
-                    <span
-                      className="text-gray-700"
-                      dangerouslySetInnerHTML={{
-                        __html: recommendation.replace(
-                          /^([\p{Emoji}])\s*/u,
-                          '$1 '
-                        ),
-                      }}
-                    />
-                  </div>
-                )
-              )}
+              {parseRecommendations(recommendationData).map((rec, idx) => {
+                return (
+                  <li key={idx} className="flex items-start space-x-2">
+                    <span className="text-2xl ">{rec?.icon}</span>
+                    <div>
+                      <span className="font-bold text-gray-700">
+                        {rec?.title}:
+                      </span>
+                      <p className="text-gray-700">{rec?.description}</p>
+                    </div>
+                  </li>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">

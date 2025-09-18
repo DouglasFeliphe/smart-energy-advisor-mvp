@@ -49,7 +49,7 @@ interface RecommendationResponse {
 }
 
 export async function postRecommendation(kwh: number): Promise<string> {
-  const prompt = `User consumes ${kwh} kWh/month. Give three practical energy-saving recommendations, following the list style with icons.`;
+  const prompt = `User consumes ${kwh} kWh/month. Give four practical energy-saving recommendations, following the list style with icons (without enumeration).`;
 
   const response = await axios.post<RecommendationResponse>(
     HUGGING_FACE_API_URL,
