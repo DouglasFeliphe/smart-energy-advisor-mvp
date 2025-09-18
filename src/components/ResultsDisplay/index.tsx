@@ -1,25 +1,12 @@
-import {
-  AlertCircle,
-  DollarSign,
-  Info,
-  Leaf,
-  Lightbulb,
-  TrendingDown,
-} from 'lucide-react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import type { Result } from '../types/energy';
-import { parseIconRecommendations } from '../helpers/formatRecommendationsFromApiResponse';
-import { calculateSavingsRate } from '../functions/calculate';
-import { SAVINGS_RATES, TARIFF_RATES } from '../config/constants';
+import { AlertCircle, Info, TrendingDown } from 'lucide-react';
 import { useState } from 'react';
+import type { Result } from '../../types/energy';
+import { calculateSavingsRate } from '../../functions/calculate';
+import { SAVINGS_RATES, TARIFF_RATES } from '../../config/constants';
+import { SummaryCards } from './SummaryCards';
+import { ConsumptionChart } from './ConsumptionChart';
+import { parseIconRecommendations } from '../../helpers/formatRecommendationsFromApiResponse';
+import { Tabs } from './Tabs';
 
 type ResultsDisplayProps = {
   result: Result;
@@ -29,15 +16,28 @@ type ResultsDisplayProps = {
   isRecommendationError: boolean;
 };
 
+const TABS = ['overview', 'details', 'recommendations'] as const;
+
+//extract the tab type from TABS
+type TabType = (typeof TABS)[number];
+
 export function ResultsDisplay({
   result,
   kwh,
   recommendation: recommendationData,
   isRecommendationError,
 }: ResultsDisplayProps) {
-  const [activeTab, setActiveTab] = useState<
-    'overview' | 'details' | 'recommendations'
-  >('overview');
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
+
+  function handleActiveTab(tab: TabType) {
+    setActiveTab(tab);
+  }
+
+  const getSavingsTierColor = () => {
+    if (kwh <= 200) return 'text-yellow-600';
+    if (kwh <= 500) return 'text-orange-600';
+    return 'text-red-600';
+  };
 
   const chartData = [
     { name: 'Current', kwh: kwh },
@@ -48,114 +48,30 @@ export function ResultsDisplay({
   const savingsPercentage = currentSavingsRate * 100;
   const tariffRate = kwh > 300 ? TARIFF_RATES.PREMIUM : TARIFF_RATES.STANDARD;
 
-  const getSavingsTierColor = () => {
-    if (kwh <= 200) return 'text-yellow-600';
-    if (kwh <= 500) return 'text-orange-600';
-    return 'text-red-600';
-  };
-
   return (
     <div className="mt-6 text-left ">
-      {/* Tabs Navigation */}
-      <div className="flex space-x-2 mb-6 pb-2 border-b">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'overview'
-              ? 'text-green-600 border-b-2 border-green-600'
-              : 'text-gray-500 hover:text-green-600'
-          }`}
-        >
-          Overview
-        </button>
-        <button
-          onClick={() => setActiveTab('details')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'details'
-              ? 'text-green-600 border-b-2 border-green-600'
-              : 'text-gray-500 hover:text-green-600'
-          }`}
-        >
-          Details
-        </button>
-        <button
-          onClick={() => setActiveTab('recommendations')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'recommendations'
-              ? 'text-green-600 border-b-2 border-green-600'
-              : 'text-gray-500 hover:text-green-600'
-          }`}
-        >
-          Recommendations
-        </button>
-      </div>
+      <Tabs tabs={[...TABS]} activeTab={activeTab} onClick={handleActiveTab} />
 
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-green-50 rounded-xl p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="text-green-700 font-medium">Energy Savings</h3>
-                <Lightbulb className="text-green-600 h-5 w-5" />
-              </div>
-              <p className="text-2xl font-bold text-green-700 mt-2">
-                {result.energySaved} kWh
-              </p>
-              <p className="text-sm text-green-600 mt-1">
-                {savingsPercentage}% reduction potential
-              </p>
-            </div>
+          <SummaryCards
+            result={{
+              energySaved: result.energySaved,
+              co2Saved: result.co2Saved,
+              moneySaved: result.moneySaved,
+            }}
+            savingsPercentage={savingsPercentage}
+          />
 
-            <div className="bg-blue-50 rounded-xl p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="text-blue-700 font-medium">CO₂ Reduction</h3>
-                <Leaf className="text-blue-600 h-5 w-5" />
-              </div>
-              <p className="text-2xl font-bold text-blue-700 mt-2">
-                {result.co2Saved} kg
-              </p>
-              <p className="text-sm text-blue-600 mt-1">Environmental impact</p>
-            </div>
-
-            <div className="bg-purple-50 rounded-xl p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="text-purple-700 font-medium">Cost Savings</h3>
-                <DollarSign className="text-purple-600 h-5 w-5" />
-              </div>
-              <p className="text-2xl font-bold text-purple-700 mt-2">
-                R${result.moneySaved}
-              </p>
-              <p className="text-sm text-purple-600 mt-1">Monthly reduction</p>
-            </div>
-          </div>
-
-          {/* Consumption Chart */}
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              Consumption Comparison
-            </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar
-                  dataKey="kwh"
-                  fill="#16a34a"
-                  radius={[8, 8, 0, 0]}
-                  name="kWh"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <ConsumptionChart
+            title={'Consumption Comparison'}
+            chartData={chartData}
+          />
         </div>
       )}
 
       {activeTab === 'details' && (
         <div className="space-y-6">
-          {/* Consumption Details */}
           {/* Consumption Details */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">

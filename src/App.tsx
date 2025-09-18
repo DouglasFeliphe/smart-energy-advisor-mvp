@@ -1,7 +1,12 @@
-import { Calculator, Loader } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Button } from './components/Button';
+import { Header } from './components/Header';
+import { Input } from './components/Input';
+import { MainContainer } from './components/MainContainer';
+import { ResultsDisplay } from './components/ResultsDisplay';
 import { EMISSION_FACTOR } from './config/constants';
-import { ErrorBoundaryComponent } from './error/ErrorBoundary';
+// import { ErrorBoundaryComponent } from './error/ErrorBoundary';
+// import { ErrorBoundaryFallback } from './error/Fallback';
 import {
   calculateSavingsRate,
   calculateTariff,
@@ -9,7 +14,8 @@ import {
 } from './functions/calculate';
 import { usePostRecommendationsMutation } from './mutations/usePostRecomendationMutation';
 import type { Result } from './types/energy';
-import { ResultsDisplay } from './components/ResultsDisplay';
+import { Container } from './components/Container';
+import { ButtonContainer } from './components/ButtonContainer';
 
 export default function App() {
   const [kwh, setKwh] = useState(0);
@@ -53,6 +59,7 @@ export default function App() {
       });
 
       await postRecommendationsAsync(kwh);
+
       setValidationMessage(null);
     } catch (error) {
       setValidationMessage('An error occurred during calculations.');
@@ -68,101 +75,43 @@ export default function App() {
   }, [kwh]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-green-200 p-6">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8 space-y-6">
-        {/* Header Section */}
-        <div className="text-center space-y-3">
-          <h1 className="text-3xl font-bold text-green-700 flex items-center justify-center gap-2">
-            Smart Energy Advisor
-            <span className="animate-pulse">⚡</span>
-          </h1>
-          <p className="text-gray-600 max-w-xl mx-auto">
-            Enter your monthly energy consumption (kWh) and see how small
-            actions can generate savings, reduce CO<sub>2</sub> and costs.
-          </p>
-        </div>
+    <MainContainer>
+      <Container>
+        <Header />
 
-        {/* Input Section */}
-        <div className="relative max-w-md mx-auto">
-          <div className="relative">
-            <input
-              type="number"
-              value={kwh || ''}
-              onChange={(e) => setKwh(Number(e.target.value))}
-              placeholder="Enter your consumption"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all outline-none"
-            />
-            <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-              kWh
-            </span>
-          </div>
+        <Input
+          kwh={kwh}
+          setKwh={setKwh}
+          validationMessage={validationMessage}
+        />
 
-          {validationMessage && (
-            <div className="absolute -bottom-6 left-0 w-full">
-              <p className="text-red-500 text-sm flex items-center gap-1">
-                <span className="inline-block w-4 h-4">⚠️</span>
-                {validationMessage}
-              </p>
-            </div>
-          )}
-        </div>
+        <ButtonContainer>
+          <Button
+            handleCalculate={handleCalculate}
+            isLoadingCalculate={isLoadingCalculate}
+            kwh={kwh}
+          />
+        </ButtonContainer>
 
-        {/* Calculate Button */}
-        <div className="pt-8 pb-12">
-          <button
-            onClick={handleCalculate}
-            disabled={isLoadingCalculate || kwh <= 0}
-            className="bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 
-                     text-white px-6 py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed
-                     flex items-center justify-center gap-2 mx-auto font-medium animate-pulse"
-          >
-            {isLoadingCalculate ? (
-              <>
-                <Loader className="animate-spin h-5 w-5" />
-                Calculating...
-              </>
-            ) : (
-              <>
-                Calculate
-                <Calculator className="h-5 w-5" />
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Results Section */}
-        <ErrorBoundaryComponent
-          fallback={
-            <div className="mt-8 text-center">
-              <p className="text-red-500 flex items-center justify-center gap-2">
-                <span className="inline-block w-5 h-5">❌</span>
-                Something went wrong
-              </p>
-            </div>
-          }
+        {/* <ErrorBoundaryComponent
+          fallback={<ErrorBoundaryFallback text="Error loading results" />}
         >
-          {/* <Suspense
-            fallback={
-              <div className="mt-8 text-center">
-                <div className="flex items-center justify-center gap-2 text-green-600">
-                  <Loader className="animate-spin h-5 w-5" />
-                  Loading recommendations...
-                </div>
-              </div>
-            }
-          > */}
-          {result && !isLoadingCalculate && !isLoadingRecommendations && (
-            <ResultsDisplay
-              result={result}
-              kwh={kwh}
-              recommendation={recommendationData ?? ''}
-              isLoadingRecommendation={isLoadingRecommendations}
-              isRecommendationError={isPostRecommendationError}
-            />
-          )}
-          {/* </Suspense> */}
-        </ErrorBoundaryComponent>
-      </div>
-    </div>
+          {result && !isLoadingCalculate && !isLoadingRecommendations && ( */}
+        <ResultsDisplay
+          // result={result}
+          result={{
+            energySaved: result?.energySaved ?? '',
+            co2Saved: result?.co2Saved ?? '',
+            moneySaved: result?.moneySaved ?? '',
+          }}
+          kwh={kwh}
+          recommendation={recommendationData ?? ''}
+          isLoadingRecommendation={isLoadingRecommendations}
+          isRecommendationError={isPostRecommendationError}
+        />
+        {/* )} */}
+        {/* </ErrorBoundaryComponent> */}
+      </Container>
+    </MainContainer>
   );
 }
