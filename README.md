@@ -1,69 +1,92 @@
-# React + TypeScript + Vite
+# Smart Energy Advisor MVP - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern web application built with React, TypeScript, and Vite that helps users analyze and optimize their energy consumption patterns. The application provides personalized recommendations using AI-powered insights through the Hugging Face API.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🔋 Real-time energy consumption monitoring
+- 💡 AI-powered recommendations for energy savings
+- 📊 Interactive dashboards and visualizations
+- 💰 Cost analysis and savings projections
+- 🌱 CO₂ emission tracking and environmental impact
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 18
+- TypeScript 5
+- Vite
+- Hugging Face API Integration
+- Material-UI/Tailwind CSS (choose your UI framework)
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+1. Clone the repository
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+git clone <your-repo-url>
+cd frontend
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Install dependencies
+
+```bash
+npm install
+```
+
+3. Set up environment variables
+   Create a `.env` file in the root directory with:
+
+```env
+VITE_HUGGING_FACE_API_URL=your_api_url
+VITE_HUGGING_FACE_TOKEN=your_token
+```
+
+4. Start the development server
+
+```bash
+npm run dev
+```
+
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run test` - Run tests
+- `npm run preview` - Preview production build
+
+### Project Structure
+
+```
+frontend/
+├── src/
+│   ├── components/    # Reusable UI components
+│   ├── pages/        # Route components
+│   ├── services/     # API and external services
+│   ├── hooks/        # Custom React hooks
+│   ├── utils/        # Helper functions
+│   └── config/       # Configuration files
+├── public/           # Static assets
+└── tests/           # Test files
+```
+
+## ESLint Configuration
+
+The project uses a robust ESLint setup for maintaining code quality. Here's the current configuration:
 
 ```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+// ...existing ESLint configuration code...
 ```
+
+## Contributing
+
+1. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Push to the branch (`git push origin feature/amazing-feature`)
+4. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
