@@ -80,7 +80,7 @@ export function ResultsDisplay({
       {activeTab === 'details' && (
         <div className="space-y-6">
           {/* Consumption Details */}
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="bg-white rounded-xl  px-0 py-6 sm:px6 md:px-6 lg:px-6 xl:px-6   shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <h3 className="text-lg font-semibold text-gray-700">
                 Consumption Details
@@ -120,7 +120,7 @@ export function ResultsDisplay({
           </div>
 
           {/* Savings Tiers Information */}
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="bg-white rounded-xl px-0 py-6 sm:px6 md:px-6 lg:px-6 xl:px-6  shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <h3 className="text-lg font-semibold text-gray-700">
                 Savings Tiers
@@ -156,7 +156,7 @@ export function ResultsDisplay({
       )}
 
       {activeTab === 'recommendations' && (
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-white rounded-xl px-0 py-6 sm:px6 md:px-6 lg:px-6 xl:px-6  shadow-sm">
           <h3 className="text-lg font-semibold text-gray-700 mb-4">
             Personalized Recommendations
           </h3>
