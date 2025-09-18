@@ -1,21 +1,15 @@
 import { Calculator, Loader } from 'lucide-react';
-import { lazy, Suspense, useEffect, useState } from 'react';
-import {
-  EMISSION_FACTOR,
-  ENERGY_COST,
-  SAVINGS_PERCENTAGE,
-} from './config/constants';
+import { useEffect, useState } from 'react';
+import { EMISSION_FACTOR } from './config/constants';
 import { ErrorBoundaryComponent } from './error/ErrorBoundary';
+import {
+  calculateSavingsRate,
+  calculateTariff,
+  validateConsumption,
+} from './functions/calculate';
 import { usePostRecommendationsMutation } from './mutations/usePostRecomendationMutation';
 import type { Result } from './types/energy';
-
-const ResultsDisplay = lazy(() =>
-  import('./components/ResultsDisplay').then((module) => ({
-    default: module.ResultsDisplay,
-  }))
-);
-// import { ResultsDisplay } from './components/ResultsDisplay'; // Keep this line commented out
-// import { ErrorBoundaryComponent } from './error/ErrorBoundary';
+import { ResultsDisplay } from './components/ResultsDisplay';
 
 export default function App() {
   const [kwh, setKwh] = useState(0);
@@ -29,98 +23,144 @@ export default function App() {
     mutateAsync: postRecommendationsAsync,
     isPending: isLoadingRecommendations,
     isError: isPostRecommendationError,
-    error,
+    // error,
     data: recommendationData,
   } = usePostRecommendationsMutation();
-  console.log('error :', error);
 
   const handleCalculate = async () => {
-    if (!kwh || kwh <= 0) {
-      setValidationMessage('Please enter a valid positive number for kWh.');
+    setIsLoadingCalculate(true);
+
+    const validationError = validateConsumption(kwh);
+
+    if (validationError) {
+      setValidationMessage(validationError);
       return;
     }
 
-    setIsLoadingCalculate(true);
+    try {
+      // Calculate with progressive rates
+      const savingsRate = calculateSavingsRate(kwh);
+      const tariff = calculateTariff(kwh);
 
-    const energySaved = kwh * SAVINGS_PERCENTAGE;
-    const co2Saved = energySaved * EMISSION_FACTOR;
-    const moneySaved = energySaved * ENERGY_COST;
+      const energySaved = kwh * savingsRate;
+      const co2Saved = energySaved * EMISSION_FACTOR;
+      const moneySaved = energySaved * tariff;
 
-    setResult({
-      energySaved: energySaved.toFixed(2),
-      co2Saved: co2Saved.toFixed(2),
-      moneySaved: moneySaved.toFixed(2),
-    });
+      setResult({
+        energySaved: energySaved.toFixed(2),
+        co2Saved: co2Saved.toFixed(2),
+        moneySaved: moneySaved.toFixed(2),
+      });
 
-    setIsLoadingCalculate(false);
-
-    await postRecommendationsAsync(kwh);
-
-    setValidationMessage(null);
+      await postRecommendationsAsync(kwh);
+      setValidationMessage(null);
+    } catch (error) {
+      setValidationMessage('An error occurred during calculations.');
+      console.error('Calculation error:', error);
+    } finally {
+      setIsLoadingCalculate(false);
+    }
   };
 
   useEffect(() => {
     setValidationMessage(null);
+    setResult(null);
   }, [kwh]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-100 to-green-300 p-6">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-8 text-center">
-        <h1 className="text-2xl font-bold mb-4 text-green-700">
-          Smart Energy Advisor ⚡
-        </h1>
-        <p className="mb-4 text-gray-600">
-          Enter your monthly energy consumption (kWh) and see how small actions
-          can generate savings, reduce CO₂ and costs.
-        </p>
-        <input
-          type="number"
-          value={kwh}
-          onChange={(e) => setKwh(Number(e.target.value))}
-          placeholder="Consumption in kWh"
-          className="w-full border border-gray-300 rounded-lg p-2 mb-4"
-        />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-green-200 p-6">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8 space-y-6">
+        {/* Header Section */}
+        <div className="text-center space-y-3">
+          <h1 className="text-3xl font-bold text-green-700 flex items-center justify-center gap-2">
+            Smart Energy Advisor
+            <span className="animate-pulse">⚡</span>
+          </h1>
+          <p className="text-gray-600 max-w-xl mx-auto">
+            Enter your monthly energy consumption (kWh) and see how small
+            actions can generate savings, reduce CO<sub>2</sub> and costs.
+          </p>
+        </div>
 
-        <p className="text-sm text-gray-500 mb-8 italic">Consumption in kWh</p>
+        {/* Input Section */}
+        <div className="relative max-w-md mx-auto">
+          <div className="relative">
+            <input
+              type="number"
+              value={kwh || ''}
+              onChange={(e) => setKwh(Number(e.target.value))}
+              placeholder="Enter your consumption"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all outline-none"
+            />
+            <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+              kWh
+            </span>
+          </div>
 
-        {validationMessage && (
-          <div className="text-red-500 mb-4">{validationMessage}</div>
-        )}
+          {validationMessage && (
+            <div className="absolute -bottom-6 left-0 w-full">
+              <p className="text-red-500 text-sm flex items-center gap-1">
+                <span className="inline-block w-4 h-4">⚠️</span>
+                {validationMessage}
+              </p>
+            </div>
+          )}
+        </div>
 
-        <button
-          onClick={handleCalculate}
-          disabled={isLoadingCalculate}
-          className="bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50"
-        >
-          {isLoadingCalculate ? 'Calculating...' : 'Calculate'}
-          <Calculator className="inline-block ml-2" />
-        </button>
+        {/* Calculate Button */}
+        <div className="pt-8 pb-12">
+          <button
+            onClick={handleCalculate}
+            disabled={isLoadingCalculate || kwh <= 0}
+            className="bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 
+                     text-white px-6 py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                     flex items-center justify-center gap-2 mx-auto font-medium animate-pulse"
+          >
+            {isLoadingCalculate ? (
+              <>
+                <Loader className="animate-spin h-5 w-5" />
+                Calculating...
+              </>
+            ) : (
+              <>
+                Calculate
+                <Calculator className="h-5 w-5" />
+              </>
+            )}
+          </button>
+        </div>
 
+        {/* Results Section */}
         <ErrorBoundaryComponent
           fallback={
-            <div className="flex items-center gap-2">
-              <p className="text-red-500 mt-4">Something went wrong.</p>
+            <div className="mt-8 text-center">
+              <p className="text-red-500 flex items-center justify-center gap-2">
+                <span className="inline-block w-5 h-5">❌</span>
+                Something went wrong
+              </p>
             </div>
           }
         >
-          <Suspense
+          {/* <Suspense
             fallback={
-              <div className="flex items-center gap-2">
-                <p className="text-primary">Loading recommendations...</p>
-                <Loader className="animate-spin text-primary" />
+              <div className="mt-8 text-center">
+                <div className="flex items-center justify-center gap-2 text-green-600">
+                  <Loader className="animate-spin h-5 w-5" />
+                  Loading recommendations...
+                </div>
               </div>
             }
-          >
-            {result && (
-              <ResultsDisplay
-                result={result}
-                kwh={kwh}
-                recommendation={recommendationData ?? ''}
-                isLoadingRecommendation={isLoadingRecommendations}
-                isRecommendationError={isPostRecommendationError}
-              />
-            )}
-          </Suspense>
+          > */}
+          {result && !isLoadingCalculate && !isLoadingRecommendations && (
+            <ResultsDisplay
+              result={result}
+              kwh={kwh}
+              recommendation={recommendationData ?? ''}
+              isLoadingRecommendation={isLoadingRecommendations}
+              isRecommendationError={isPostRecommendationError}
+            />
+          )}
+          {/* </Suspense> */}
         </ErrorBoundaryComponent>
       </div>
     </div>
