@@ -5,8 +5,8 @@ import { Input } from './components/Input';
 import { MainContainer } from './components/MainContainer';
 import { ResultsDisplay } from './components/ResultsDisplay';
 import { EMISSION_FACTOR } from './config/constants';
-// import { ErrorBoundaryComponent } from './error/ErrorBoundary';
-// import { ErrorBoundaryFallback } from './error/Fallback';
+import { ErrorBoundaryComponent } from './error/ErrorBoundary';
+import { ErrorBoundaryFallback } from './error/Fallback';
 import {
   calculateSavingsRate,
   calculateTariff,
@@ -93,24 +93,24 @@ export default function App() {
           />
         </ButtonContainer>
 
-        {/* <ErrorBoundaryComponent
+        <ErrorBoundaryComponent
           fallback={<ErrorBoundaryFallback text="Error loading results" />}
         >
-          {result && !isLoadingCalculate && !isLoadingRecommendations && ( */}
-        <ResultsDisplay
-          // result={result}
-          result={{
-            energySaved: result?.energySaved ?? '',
-            co2Saved: result?.co2Saved ?? '',
-            moneySaved: result?.moneySaved ?? '',
-          }}
-          kwh={kwh}
-          recommendation={recommendationData ?? ''}
-          isLoadingRecommendation={isLoadingRecommendations}
-          isRecommendationError={isPostRecommendationError}
-        />
-        {/* )} */}
-        {/* </ErrorBoundaryComponent> */}
+          {result && !isLoadingCalculate && !isLoadingRecommendations && (
+            <ResultsDisplay
+              result={result}
+              // result={{
+              //   energySaved: result?.energySaved ?? '',
+              //   co2Saved: result?.co2Saved ?? '',
+              //   moneySaved: result?.moneySaved ?? '',
+              // }}
+              kwh={kwh}
+              recommendation={recommendationData ?? ''}
+              isLoadingRecommendation={isLoadingRecommendations}
+              isRecommendationError={isPostRecommendationError}
+            />
+          )}
+        </ErrorBoundaryComponent>
       </Container>
     </MainContainer>
   );
