@@ -4,10 +4,9 @@ A modern web application built with React, TypeScript, and Vite that helps users
 
 ## Features
 
-- 🔋 Real-time energy consumption monitoring
 - 💡 AI-powered recommendations for energy savings
-- 📊 Interactive dashboards and visualizations
 - 💰 Cost analysis and savings projections
+- 📊 Interactive dashboards and visualizations
 - 🌱 CO₂ emission tracking and environmental impact
 
 ## Tech Stack
@@ -15,8 +14,8 @@ A modern web application built with React, TypeScript, and Vite that helps users
 - React 18
 - TypeScript 5
 - Vite
-- Hugging Face API Integration
-- Material-UI/Tailwind CSS (choose your UI framework)
+- Hugging Face API Integration (for chat completions)
+- Tailwind CSS
 
 ## Getting Started
 
@@ -62,14 +61,15 @@ npm run dev
 ```
 frontend/
 ├── src/
-│   ├── components/    # Reusable UI components
+│   ├── components/   # Reusable UI components
 │   ├── pages/        # Route components
 │   ├── services/     # API and external services
 │   ├── hooks/        # Custom React hooks
+│   ├── mutations/    # Service Mutations
 │   ├── utils/        # Helper functions
 │   └── config/       # Configuration files
 ├── public/           # Static assets
-└── tests/           # Test files
+└── tests/            # Test files
 ```
 
 ## ESLint Configuration
